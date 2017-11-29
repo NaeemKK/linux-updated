@@ -613,7 +613,15 @@ static void hidg_disable(struct usb_function *f)
 		kfree(list);
 	}
 	spin_unlock_irqrestore(&hidg->read_spinlock, flags);
+	
+	spin_lock_irqsave(&hidg->write_spinlock, flags);
+        if (!hidg->write_pending) {
+                free_ep_req(hidg->in_ep, hidg->req);
+                hidg->write_pending = 1;
+        }
 
+        hidg->req = NULL;
+        spin_unlock_irqrestore(&hidg->write_spinlock, flags);
 }
 
 static int hidg_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
@@ -796,6 +804,8 @@ static int hidg_bind(struct usb_configuration *c, struct usb_function *f)
 		goto fail;
 
 	spin_lock_init(&hidg->write_spinlock);
+	hidg->write_pending = 1;
+	hidg->req = NULL;
 	spin_lock_init(&hidg->read_spinlock);
 	init_waitqueue_head(&hidg->write_queue);
 	init_waitqueue_head(&hidg->read_queue);
