@@ -29,7 +29,7 @@ EXPORT_SYMBOL(dwc3_host_wakeup_capable);
 
 int dwc3_host_init(struct dwc3 *dwc)
 {
-	struct property_entry	props[3];
+	struct property_entry	props[4];
 	struct platform_device	*xhci;
 	int			ret, irq;
 	unsigned int		index = 0;
